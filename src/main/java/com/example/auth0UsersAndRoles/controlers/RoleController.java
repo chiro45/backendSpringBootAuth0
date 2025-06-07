@@ -7,10 +7,11 @@ import com.example.auth0UsersAndRoles.entities.dto.RoleDTO;
 import com.example.auth0UsersAndRoles.entities.dto.UserDTO;
 import com.example.auth0UsersAndRoles.services.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/roles")
+@RequestMapping(path = "/api/admin/roles", produces = MediaType.APPLICATION_JSON_VALUE)
 public class RoleController {
 
     @Autowired

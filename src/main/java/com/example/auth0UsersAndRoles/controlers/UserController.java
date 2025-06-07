@@ -8,12 +8,11 @@ import com.example.auth0UsersAndRoles.entities.dto.AssingRoleDTO;
 import com.example.auth0UsersAndRoles.entities.dto.UserDTO;
 import com.example.auth0UsersAndRoles.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
-@RequestMapping("/users")
+@RequestMapping(path="/api/admin/users" ,produces = MediaType.APPLICATION_JSON_VALUE)
 public class UserController {
 
     @Autowired
@@ -25,23 +24,23 @@ public class UserController {
     }
     //traemos un usuariopor id
     @GetMapping("/getUserById")
-    public User getUserById(@RequestBody UserDTO userDTO) throws Exception {
-        return userService.getUserById(userDTO.getId());
+    public User getUserById(@RequestBody UserDTO UserDTO) throws Exception {
+        return userService.getUserById(UserDTO.getId());
     }
     //creamos el usuario
     @PostMapping("/createUser")
-    public User createUser(@RequestBody UserDTO userDTO) throws Exception {
-        return userService.createUser(userDTO);
+    public User createUser(@RequestBody UserDTO UserDTO) throws Exception {
+        return userService.createUser(UserDTO);
     }
     //modificamos un usuario
     @PutMapping("/modifyUser")
-    public User modifyUser(@RequestBody UserDTO userDto) throws Exception {
-        return userService.modifyUser(userDto);
+    public User modifyUser(@RequestBody UserDTO UserDTO) throws Exception {
+        return userService.modifyUser(UserDTO);
     }
     //eliminamos un usuario
     @DeleteMapping("/deleteUserById")
-    public void deleteUser(@RequestBody UserDTO userDto) throws Exception {
-        userService.deleteUser(userDto.getId());
+    public void deleteUser(@RequestBody UserDTO UserDTO) throws Exception {
+        userService.deleteUser(UserDTO.getId());
     }
     //agregamos los roles a un usuario
     @PostMapping("/addRolesUser")

@@ -6,6 +6,7 @@ import com.auth0.json.mgmt.users.UsersPage;
 
 
 import com.example.auth0UsersAndRoles.entities.dto.UserDTO;
+import com.example.auth0UsersAndRoles.repositories.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,7 @@ import java.util.List;
 
 @Service
 public class UserService {
+
 
     @Autowired
     private ManagementAPI managementAPI;

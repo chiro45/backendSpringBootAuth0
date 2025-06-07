@@ -2,7 +2,7 @@ version: '3.8'
 services:
   mysql:
     image: mysql:8
-    container_name: mysql-auth
+    container_name: mysql-mp
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: mp

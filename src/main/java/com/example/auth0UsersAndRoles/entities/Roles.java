@@ -19,5 +19,5 @@ public class Roles extends Base {
     private String name;
 
     @ManyToMany(mappedBy = "roles")
-    private Set<Usuario> usuarios = new HashSet<>();
+    private Set<User> usuarios = new HashSet<>();
 }

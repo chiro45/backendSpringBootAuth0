@@ -1,4 +1,4 @@
-package com.example.auth0UsersAndRoles.config;
+package com.example.auth0UsersAndRoles.config.Auth0;
 
 import com.auth0.client.mgmt.ManagementAPI;
 import com.auth0.json.auth.TokenHolder;

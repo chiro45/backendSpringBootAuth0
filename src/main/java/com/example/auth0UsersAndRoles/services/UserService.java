@@ -52,6 +52,7 @@ public class UserService {
         user.setPassword(dto.getPassword());
         user.setName(dto.getName());
         user.setEmailVerified(true);
+
         return managementAPI.users().create(user).execute();
     }
     //eliminamos un usuario

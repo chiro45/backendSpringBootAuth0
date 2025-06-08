@@ -1,6 +1,5 @@
 package com.example.auth0UsersAndRoles.entities;
 
-import com.example.auth0UsersAndRoles.entities.fixedEntities.Role;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
@@ -16,12 +15,8 @@ import java.util.Set;
 @Getter
 @Setter
 public class User extends Base {
-
     private String userEmail;
     private String password;
-
-    @OneToOne
-    private Role role;
 
     private String name;
     private String lastName;

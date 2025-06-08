@@ -1,5 +1,7 @@
 package com.example.auth0UsersAndRoles.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,7 +19,10 @@ public class Roles extends Base {
 
     private String description;
     private String name;
+    @Column(name = "auth0_role_id")
+    private String auth0RoleId;
 
     @ManyToMany(mappedBy = "roles")
+    @JsonIgnore
     private Set<User> usuarios = new HashSet<>();
 }

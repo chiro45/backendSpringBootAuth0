@@ -1,12 +1,11 @@
 package com.example.auth0UsersAndRoles.entities;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Value;
+
 import java.io.Serializable;
 
 @MappedSuperclass
@@ -18,5 +17,5 @@ public abstract class Base implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Boolean estado;
+    private Boolean deleted= false;
 }

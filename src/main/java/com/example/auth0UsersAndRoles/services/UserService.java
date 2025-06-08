@@ -29,7 +29,7 @@ public class UserService {
     }
     //modificar un usuario
     public User modifyUser(UserDTO userDTO) throws Exception {
-        String userId = userDTO.getId();
+        String userId = userDTO.getAuth0Id();
         User userUpdate = new User();
 
         if (userDTO.getName() != null && !userDTO.getName().isEmpty()) {

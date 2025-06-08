@@ -1,5 +1,6 @@
 package com.example.auth0UsersAndRoles.services;
 
+import com.example.auth0UsersAndRoles.entities.Roles;
 import com.example.auth0UsersAndRoles.entities.User;
 import com.example.auth0UsersAndRoles.repositories.RoleRepository;
 import com.example.auth0UsersAndRoles.repositories.UserRepository;
@@ -72,18 +73,25 @@ public class UserBBDDService {
     }
 
     @Transactional
-    public boolean delete(Long id) throws Exception {
+    public boolean delete(String id) throws Exception {
         try {
-            Optional<User> entityOptional = userRepository.findById(id);
-            if (entityOptional.isPresent()) {
-                entityOptional
-                        .get()
-                        .setDeleted(true);
-                userRepository.save(entityOptional.get());
+            User entityOptional = userRepository.getUserByAuth0Id(id);
+
+                entityOptional.setDeleted(true);
+                userRepository.save(entityOptional);
                 return true;
-            }else {
-                throw new Exception("No existe la entidad");
-            }
+
+        }catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+    }
+
+    @Transactional
+    public boolean deleteFisic(String id) throws Exception {
+        try {
+            User entityOptional = userRepository.getUserByAuth0Id(id);
+            userRepository.delete(entityOptional);
+            return true;
         }catch (Exception e) {
             throw new Exception(e.getMessage());
         }

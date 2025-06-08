@@ -31,15 +31,6 @@ public class RoleService {
     }
 
     @Transactional
-    public List<Roles> findAllActive() throws Exception {
-        try {
-            return roleRepository.findAll().stream().filter(entity -> !entity.getDeleted()).collect(Collectors.toList());
-        }catch (Exception e) {
-            throw new Exception(e.getMessage());
-        }
-    }
-
-    @Transactional
     public Roles findById(String id) throws Exception {
         try {
             return roleRepository.getRolesByAuth0RoleId(id);
@@ -71,14 +62,28 @@ public class RoleService {
     }
 
     @Transactional
-    public boolean delete(Long id) throws Exception {
+    public boolean delete(String id) throws Exception {
         try {
-            Optional<Roles> entityOptional = roleRepository.findById(id);
+            Optional<Roles> entityOptional = roleRepository.findByAuth0RoleId(id);
             if (entityOptional.isPresent()) {
                 entityOptional
                         .get()
                         .setDeleted(true);
                 roleRepository.save(entityOptional.get());
+                return true;
+            }else {
+                throw new Exception("No existe la entidad");
+            }
+        }catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+    }
+    @Transactional
+    public boolean deleteFisic(String id) throws Exception {
+        try {
+            Optional<Roles> entityOptional = roleRepository.findByAuth0RoleId(id);
+            if (entityOptional.isPresent()) {
+                roleRepository.delete(entityOptional.get());
                 return true;
             }else {
                 throw new Exception("No existe la entidad");

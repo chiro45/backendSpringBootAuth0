@@ -16,10 +16,9 @@ import java.util.Set;
 @Setter
 public class User extends Base {
     private String userEmail;
-    private String password;
-
     private String name;
     private String lastName;
+    private String nickName;
 
     @Column(name = "auth0_id")
     private String auth0Id;

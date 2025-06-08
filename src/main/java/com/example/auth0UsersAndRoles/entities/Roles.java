@@ -16,7 +16,6 @@ import java.util.Set;
 @Getter
 @Setter
 public class Roles extends Base {
-
     private String description;
     private String name;
     @Column(name = "auth0_role_id")

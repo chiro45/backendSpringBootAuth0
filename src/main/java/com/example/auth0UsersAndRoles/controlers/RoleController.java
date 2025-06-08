@@ -38,14 +38,16 @@ public class RoleController {
         return  roleServicebbdd.findById(id);
     }
 
-    @GetMapping("/getUserRoles")
-    public RolesPage getUserRoles(@RequestBody UserDTO userDTO) throws Exception {
-        return  roleService.getUserRoles(userDTO);
-    }
-
-    @GetMapping("/modifyRole")
-    public Role modifyRole(@RequestBody RoleDTO roleDTO) throws Exception {
-        return  roleService.modifyRole(roleDTO);
+    @PutMapping("/modifyRole")
+    public Roles modifyRole(@RequestBody RoleDTO roleDTO) throws Exception {
+        Role updatedRoleAuth0 = roleService.modifyRole(roleDTO);
+        Roles updatedRole = Roles.builder()
+                .name(updatedRoleAuth0.getName())
+                .description(updatedRoleAuth0.getDescription())
+                .auth0RoleId(updatedRoleAuth0.getId())
+                .build();
+        updatedRole.setId(roleDTO.getId());
+        return roleServicebbdd.update(updatedRole) ;
     }
 
     @PostMapping("/createRole")
@@ -61,6 +63,14 @@ public class RoleController {
 
     @DeleteMapping("/deleteRole")
     public void deleteRole(@RequestParam("id") String id) throws Exception {
+        roleServicebbdd.delete(id);
+    }
+
+    @DeleteMapping("/deleteRoleFisic")
+    public void deleteRoleFisic(@RequestParam("id") String id) throws Exception {
+        roleServicebbdd.deleteFisic(id);
         roleService.deleteRole(id);
     }
+
+
 }

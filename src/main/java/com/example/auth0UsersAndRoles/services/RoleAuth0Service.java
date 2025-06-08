@@ -40,23 +40,24 @@ public class RoleAuth0Service {
     }
     //roles de un usuario
     public RolesPage getUserRoles(@RequestBody UserDTO userDTO) throws Exception {
-        String userId = userDTO.getId();
-        // Opcional: podés agregar filtros o paginación si querés
+        String userId = userDTO.getAuth0Id();
         return   managementAPI.users().listRoles(userId, null).execute();
     }
+
     //modificar role
     public Role modifyRole(RoleDTO dto) throws Exception {
-        String id = dto.getId();
+        String id = dto.getAuth0RoleId();
         String name = dto.getName();
         String description = dto.getDescription();
         Role role = new Role();
 
-        if (name == null || name.trim().isEmpty()) {
+        if (name != null && !name.trim().isEmpty()) {
             role.setName(name);
         }
-        if (description == null || description.trim().isEmpty()) {
+        if (description != null && !description.trim().isEmpty()) {
             role.setDescription(description);
         }
+
         return managementAPI.roles().update(id, role).execute();
     }
     //eliminar role

@@ -46,10 +46,14 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
                                 .requestMatchers("/api/public").permitAll()
-                                .requestMatchers("/api/admin/**", "/api/client/**", "/api/kitchener/**").hasAuthority("Administrador")
                                 .requestMatchers("/api/client/**").hasAuthority("Cliente")
+                                .requestMatchers("/api/admin/users/getUserById").hasAuthority("Cliente")
+                                .requestMatchers("/api/admin/users/createUserClient").hasAuthority("Cliente")
+                                .requestMatchers("/api/admin/roles/getRoleByName").hasAuthority("Cliente")
                                 .requestMatchers("/api/kitchener/**").hasAuthority("Cocinero")
+                                .requestMatchers("/api/admin/**", "/api/client/**", "/api/kitchener/**").hasAuthority("Administrador")
                                 .anyRequest().authenticated()
+                        //.anyRequest().permitAll()
                 )
                 .oauth2ResourceServer(oauth2ResourceServer ->
                         oauth2ResourceServer

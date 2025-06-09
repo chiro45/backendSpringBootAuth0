@@ -1,9 +1,6 @@
 package com.example.auth0UsersAndRoles.controlers;
 
 
-import com.auth0.json.mgmt.users.UsersPage;
-
-
 import com.example.auth0UsersAndRoles.entities.Roles;
 import com.example.auth0UsersAndRoles.entities.User;
 import com.example.auth0UsersAndRoles.entities.dto.AssingRoleDTO;
@@ -11,139 +8,178 @@ import com.example.auth0UsersAndRoles.entities.dto.UserDTO;
 import com.example.auth0UsersAndRoles.repositories.RoleRepository;
 import com.example.auth0UsersAndRoles.services.UserBBDDService;
 import com.example.auth0UsersAndRoles.services.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 @RestController
-@RequestMapping(path="/api/admin/users" ,produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(path = "/api/admin/users", produces = MediaType.APPLICATION_JSON_VALUE)
 public class UserController {
-    private UserService userService;
-    private UserBBDDService userBBDDService;
-    private RoleRepository roleRepository;
 
-    public UserController(UserService userService, RoleRepository roleRepository,UserBBDDService userBBDDService) {
+    private final UserService userService;
+    private final UserBBDDService userBBDDService;
+    private final RoleRepository roleRepository;
+
+    public UserController(UserService userService, RoleRepository roleRepository, UserBBDDService userBBDDService) {
         this.userService = userService;
         this.roleRepository = roleRepository;
         this.userBBDDService = userBBDDService;
     }
 
-    //traemos todos los usuarios
     @GetMapping
-    public List<User> getAllUsers() throws Exception {
-        return userBBDDService.findAll();
+    public ResponseEntity<?> getAllUsers() {
+        try {
+            List<User> users = userBBDDService.findAll();
+            return ResponseEntity.ok(users);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error al obtener los usuarios: " + e.getMessage());
+        }
     }
-    //traemos un usuariopor id
+
     @PostMapping("/getUserById")
-    public User getUserById(@RequestBody UserDTO UserDTO) throws Exception {
-        return userBBDDService.findById(UserDTO.getAuth0Id());
+    public ResponseEntity<?> getUserById(@RequestBody UserDTO userDTO) {
+        try {
+            User user = userBBDDService.findById(userDTO.getAuth0Id());
+            return ResponseEntity.ok(user);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado: " + e.getMessage());
+        }
     }
 
-    //creamos el usuario
     @PostMapping("/createUser")
-    public User createUser(@RequestBody UserDTO UserDTO) throws Exception {
-        com.auth0.json.mgmt.users.User newUser = userService.createUser(UserDTO);
-        userService.assignRoles(newUser.getId(), UserDTO.getRoles());
-        Set<Roles> rolesAsignados = UserDTO.getRoles().stream()
-                .map(idRol -> roleRepository.findByAuth0RoleId(idRol)
-                        .orElseThrow(() -> new RuntimeException("Rol no encontrado: " + idRol)))
-                .collect(Collectors.toSet());
+    public ResponseEntity<?> createUser(@RequestBody UserDTO userDTO) {
+        try {
+            com.auth0.json.mgmt.users.User newUser = userService.createUser(userDTO);
+            userService.assignRoles(newUser.getId(), userDTO.getRoles());
 
-        User userbbdd = User.builder()
-                .auth0Id(newUser.getId())
-                .name(newUser.getName())
-                .roles(rolesAsignados)
-                .nickName(UserDTO.getNickName())
-                .userEmail(newUser.getEmail())
-                .build();
-        return userBBDDService.save(userbbdd) ;
+            Set<Roles> rolesAsignados = userDTO.getRoles().stream()
+                    .map(idRol -> roleRepository.findByAuth0RoleId(idRol)
+                            .orElseThrow(() -> new RuntimeException("Rol no encontrado: " + idRol)))
+                    .collect(Collectors.toSet());
+
+            User userBBDD = User.builder()
+                    .auth0Id(newUser.getId())
+                    .name(newUser.getName())
+                    .roles(rolesAsignados)
+                    .nickName(userDTO.getNickName())
+                    .userEmail(newUser.getEmail())
+                    .build();
+
+            return ResponseEntity.ok(userBBDDService.save(userBBDD));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error al crear el usuario: " + e.getMessage());
+        }
     }
+
     @PostMapping("/createUserClient")
-    public User createUserClient(@RequestBody UserDTO UserDTO) throws Exception {
-        com.auth0.json.mgmt.users.User getUserAuth0 = userService.getUserById(UserDTO.getAuth0Id());
-        userService.assignRoles(getUserAuth0.getId(), UserDTO.getRoles());
-        Set<Roles> rolesAsignados = UserDTO.getRoles().stream()
-                .map(idRol -> roleRepository.findByAuth0RoleId(idRol)
-                        .orElseThrow(() -> new RuntimeException("Rol no encontrado: " + idRol)))
-                .collect(Collectors.toSet());
+    public ResponseEntity<?> createUserClient(@RequestBody UserDTO userDTO) {
+        try {
+            com.auth0.json.mgmt.users.User userAuth0 = userService.getUserById(userDTO.getAuth0Id());
+            userService.assignRoles(userAuth0.getId(), userDTO.getRoles());
 
-        User userbbdd = User.builder()
-                .auth0Id(getUserAuth0.getId())
-                .name(getUserAuth0.getName())
-                .roles(rolesAsignados)
-                .nickName(UserDTO.getNickName())
-                .userEmail(getUserAuth0.getEmail())
-                .build();
-        return userBBDDService.save(userbbdd) ;
+            Set<Roles> rolesAsignados = userDTO.getRoles().stream()
+                    .map(idRol -> roleRepository.findByAuth0RoleId(idRol)
+                            .orElseThrow(() -> new RuntimeException("Rol no encontrado: " + idRol)))
+                    .collect(Collectors.toSet());
+
+            User userBBDD = User.builder()
+                    .auth0Id(userAuth0.getId())
+                    .name(userAuth0.getName())
+                    .roles(rolesAsignados)
+                    .nickName(userDTO.getNickName())
+                    .userEmail(userAuth0.getEmail())
+                    .build();
+
+            return ResponseEntity.ok(userBBDDService.save(userBBDD));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error al crear cliente: " + e.getMessage());
+        }
     }
 
-    //modificamos un usuario
     @PutMapping("/modifyUser")
-    public User modifyUser(@RequestBody UserDTO UserDTO) throws Exception {
-        com.auth0.json.mgmt.users.User newUser = userService.modifyUser(UserDTO);
+    public ResponseEntity<?> modifyUser(@RequestBody UserDTO userDTO) {
+        try {
+            com.auth0.json.mgmt.users.User newUser = userService.modifyUser(userDTO);
 
-        Set<Roles> rolesAsignados = UserDTO.getRoles().stream()
-                .map(idRol -> roleRepository.findByAuth0RoleId(idRol)
-                        .orElseThrow(() -> new RuntimeException("Rol no encontrado: " + idRol)))
-                .collect(Collectors.toSet());
+            Set<Roles> rolesAsignados = userDTO.getRoles().stream()
+                    .map(idRol -> roleRepository.findByAuth0RoleId(idRol)
+                            .orElseThrow(() -> new RuntimeException("Rol no encontrado: " + idRol)))
+                    .collect(Collectors.toSet());
 
-        User updatedUser = User.builder()
-                .auth0Id(newUser.getId())
-                .name(newUser.getName())
-                .userEmail(newUser.getEmail())
-                .nickName(UserDTO.getNickName())
-                .roles(rolesAsignados)
-                .lastName(UserDTO.getLastName())
-                .build();
-        updatedUser.setId(UserDTO.getId());
+            User updatedUser = User.builder()
+                    .auth0Id(newUser.getId())
+                    .name(newUser.getName())
+                    .userEmail(newUser.getEmail())
+                    .nickName(userDTO.getNickName())
+                    .roles(rolesAsignados)
+                    .lastName(userDTO.getLastName())
+                    .build();
+            updatedUser.setId(userDTO.getId());
 
-        return userBBDDService.update(updatedUser);
+            return ResponseEntity.ok(userBBDDService.update(updatedUser));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error al modificar usuario: " + e.getMessage());
+        }
     }
 
-    //eliminamos un usuario
     @DeleteMapping("/deleteUserById")
-    public void deleteUser(@RequestBody UserDTO UserDTO) throws Exception {
-        userBBDDService.delete(UserDTO.getAuth0Id());
+    public ResponseEntity<?> deleteUser(@RequestBody UserDTO userDTO) {
+        try {
+            userBBDDService.delete(userDTO.getAuth0Id());
+            return ResponseEntity.ok("Usuario eliminado (lógico) correctamente.");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error al eliminar usuario: " + e.getMessage());
+        }
     }
 
-    //eliminamos un usuario
     @DeleteMapping("/deleteUserByIdFisic")
-    public void deleteUserFisic(@RequestBody UserDTO UserDTO) throws Exception {
-        userBBDDService.deleteFisic(UserDTO.getAuth0Id());
-        userService.deleteUser(UserDTO.getAuth0Id());
+    public ResponseEntity<?> deleteUserFisic(@RequestBody UserDTO userDTO) {
+        try {
+            userBBDDService.deleteFisic(userDTO.getAuth0Id());
+            userService.deleteUser(userDTO.getAuth0Id());
+            return ResponseEntity.ok("Usuario eliminado físicamente.");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error al eliminar físicamente al usuario: " + e.getMessage());
+        }
     }
 
-    //agregamos los roles a un usuario
     @PostMapping("/addRolesUser")
-    public User assignRoles(@RequestBody AssingRoleDTO request) throws Exception {
-        userService.assignRoles(request.getId(), request.getRoles());
-        User user = userBBDDService.findById(request.getId());
-        Set<Roles> rolesAAgregar = request.getRoles().stream()
-                .map(idRol -> roleRepository.findByAuth0RoleId(idRol)
-                        .orElseThrow(() -> new RuntimeException("Rol no encontrado: " + idRol)))
-                .collect(Collectors.toSet());
-        // Agregar a los roles actuales
-        user.getRoles().addAll(rolesAAgregar);
+    public ResponseEntity<?> assignRoles(@RequestBody AssingRoleDTO request) {
+        try {
+            userService.assignRoles(request.getId(), request.getRoles());
+            User user = userBBDDService.findById(request.getId());
 
-        return userBBDDService.update(user);
+            Set<Roles> rolesAAgregar = request.getRoles().stream()
+                    .map(idRol -> roleRepository.findByAuth0RoleId(idRol)
+                            .orElseThrow(() -> new RuntimeException("Rol no encontrado: " + idRol)))
+                    .collect(Collectors.toSet());
+
+            user.getRoles().addAll(rolesAAgregar);
+            return ResponseEntity.ok(userBBDDService.update(user));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error al agregar roles: " + e.getMessage());
+        }
     }
 
-    //removemos roles a un usuario
     @PostMapping("/removeRolesUser")
-    public User removeRoles(@RequestBody AssingRoleDTO request) throws Exception {
-        userService.removeRoles(request.getId(), request.getRoles());
-        User user = userBBDDService.findById(request.getId());
+    public ResponseEntity<?> removeRoles(@RequestBody AssingRoleDTO request) {
+        try {
+            userService.removeRoles(request.getId(), request.getRoles());
+            User user = userBBDDService.findById(request.getId());
 
-        Set<Roles> rolesAEliminar = request.getRoles().stream()
-                .map(idRol -> roleRepository.findByAuth0RoleId(idRol)
-                        .orElseThrow(() -> new RuntimeException("Rol no encontrado: " + idRol)))
-                .collect(Collectors.toSet());
+            Set<Roles> rolesAEliminar = request.getRoles().stream()
+                    .map(idRol -> roleRepository.findByAuth0RoleId(idRol)
+                            .orElseThrow(() -> new RuntimeException("Rol no encontrado: " + idRol)))
+                    .collect(Collectors.toSet());
 
-        user.getRoles().removeAll(rolesAEliminar);
-        return userBBDDService.update(user);
+            user.getRoles().removeAll(rolesAEliminar);
+            return ResponseEntity.ok(userBBDDService.update(user));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error al quitar roles: " + e.getMessage());
+        }
     }
 }

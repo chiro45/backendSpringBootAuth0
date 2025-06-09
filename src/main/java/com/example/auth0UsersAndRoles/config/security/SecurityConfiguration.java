@@ -45,11 +45,11 @@ public class SecurityConfiguration {
                 .cors(withDefaults()) //por defecto spring va a buscar un bean con el nombre "corsConfigurationSource".
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                /*
-                                .requestMatchers("/api/public/**").permitAll()
-                                .requestMatchers("/api/admin/**").hasAuthority("administrador")
-                                .requestMatchers("/api/client/**").hasAuthority("cliented")*/
-                                .anyRequest().permitAll()
+                                .requestMatchers("/api/public").permitAll()
+                                .requestMatchers("/api/admin/**", "/api/client/**", "/api/kitchener/**").hasAuthority("Administrador")
+                                .requestMatchers("/api/client/**").hasAuthority("Cliente")
+                                .requestMatchers("/api/kitchener/**").hasAuthority("Cocinero")
+                                .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2ResourceServer ->
                         oauth2ResourceServer

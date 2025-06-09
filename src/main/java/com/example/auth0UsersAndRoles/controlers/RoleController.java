@@ -27,6 +27,10 @@ public class RoleController {
         this.roleService = roleService;
     }
 
+    @GetMapping("/getRoleByName")
+    public  Roles getRoleByName(@RequestParam String name) throws Exception {
+        return roleServicebbdd.findByName(name);
+    }
 
     @GetMapping
     public List<Roles> getAllRoles() throws Exception {

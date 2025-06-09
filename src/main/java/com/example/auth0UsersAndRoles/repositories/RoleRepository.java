@@ -10,5 +10,6 @@ import java.util.Optional;
 public interface RoleRepository extends BaseRepository<Roles,Long> {
     Optional<Roles> findByAuth0RoleId(String name);
     Roles getRolesByAuth0RoleId (String id);
+    Roles getRolesByName(String name);
 
 }

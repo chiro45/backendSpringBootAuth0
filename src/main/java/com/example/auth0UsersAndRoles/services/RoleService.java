@@ -40,6 +40,15 @@ public class RoleService {
     }
 
     @Transactional
+    public Roles findByName(String name) throws Exception {
+        try {
+            return roleRepository.getRolesByName(name);
+        }catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+    }
+
+    @Transactional
     public Roles save(Roles entity) throws Exception {
         try {
             entity = roleRepository.save(entity);

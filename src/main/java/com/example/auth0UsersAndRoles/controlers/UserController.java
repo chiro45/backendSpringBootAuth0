@@ -38,7 +38,7 @@ public class UserController {
         return userBBDDService.findAll();
     }
     //traemos un usuariopor id
-    @GetMapping("/getUserById")
+    @PostMapping("/getUserById")
     public User getUserById(@RequestBody UserDTO UserDTO) throws Exception {
         return userBBDDService.findById(UserDTO.getAuth0Id());
     }
@@ -59,6 +59,24 @@ public class UserController {
                 .roles(rolesAsignados)
                 .nickName(UserDTO.getNickName())
                 .userEmail(newUser.getEmail())
+                .build();
+        return userBBDDService.save(userbbdd) ;
+    }
+    @PostMapping("/createUserClient")
+    public User createUserClient(@RequestBody UserDTO UserDTO) throws Exception {
+        com.auth0.json.mgmt.users.User getUserAuth0 = userService.getUserById(UserDTO.getAuth0Id());
+        userService.assignRoles(getUserAuth0.getId(), UserDTO.getRoles());
+        Set<Roles> rolesAsignados = UserDTO.getRoles().stream()
+                .map(idRol -> roleRepository.findByAuth0RoleId(idRol)
+                        .orElseThrow(() -> new RuntimeException("Rol no encontrado: " + idRol)))
+                .collect(Collectors.toSet());
+
+        User userbbdd = User.builder()
+                .auth0Id(getUserAuth0.getId())
+                .name(getUserAuth0.getName())
+                .roles(rolesAsignados)
+                .nickName(UserDTO.getNickName())
+                .userEmail(getUserAuth0.getEmail())
                 .build();
         return userBBDDService.save(userbbdd) ;
     }

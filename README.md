@@ -34,68 +34,26 @@ Estas se encuentran normalmente en un archivo `.env` o directamente en el archiv
 
 ---
 
-## 🧩 Inicialización: configuración de roles y usuario administrador
+## 🧩 Inicialización: Configuración de Roles y Usuario Administrador
 
-Al iniciar la aplicación **por primera vez**, es necesario crear **dos roles fundamentales** en Auth0:
-
-- `Administrador`
-- `Cliente`
+### 1) Setear Variables de Entorno
+Asegurate de configurar correctamente **todas las variables de entorno necesarias** antes de ejecutar el proyecto.
 
 ---
 
-### 🔁 Opciones para crear roles
+### 2) Inicializar el Proyecto
+Descomentá el bloque de código correspondiente en el archivo `main`.  
+Esto hará lo siguiente:
 
-Tenés dos formas de hacerlo:
-
----
-
-### ✅ Opción 1: Crear roles usando Postman (modo manual)
-
-Podés **deshabilitar temporalmente la seguridad** de la aplicación (comentando los filtros o permitiendo todos los endpoints en `SecurityConfig`)  
-y luego enviar estas peticiones a la API:
+- Creará los roles: **Administrador** y **Cliente**
+- Generará el **usuario administrador** en la base de datos y en **Auth0**
+- Con las credenciales de usuario administrador: mail y contraseña que le pusimos en el main podremos ingresar en el front como admin y seguir generando roles.
 
 ---
 
-#### 1. Crear Rol "Administrador"
+### ⚠️ Importante
+**No olvides volver a comentar el bloque de inicialización** una vez completado este paso.  
+Este código **solo debe ejecutarse una vez para la configuración inicial** del sistema.
 
-**POST** `/api/admin/roles/createRole`  
-**Body:**
-```json
-{
-  "name": "Administrador",
-  "description": "admin del local"
-}
-```
----
-
-#### 2. Crear Rol "Cliente"
-
-**POST** `/api/admin/roles/createRole`  
-**Body:**
-```json
-{
-  "name": "Cliente",
-  "description": "cliente del sistema"
-}
-```
-### 3. Crear usuario administrador en Auth0
-Usando la API de Auth0 (requiere token de acceso válido), podés crear el usuario administrador con el siguiente body.
-Este usuario debe estar vinculado al rol Administrador previamente creado:
-
-POST https://<TU_DOMINIO_AUTH0>/api/v2/users
-Body:
-```json
-{
-  "email": "admin@buensabor.com",
-  "name": "Administrador",
-  "nickName": "admin total",
-  "password": "Admin@admin",
-  "connection": "Username-Password-Authentication",
-  "roles": ["id_generado_de_auth0"]
-}
-
-```
-⚠️ Importante:
-Importante al tener la base de datos sincronizada con los usuarios y roles de auth0 es muy importante poder realizar esto
 
 

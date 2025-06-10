@@ -7,7 +7,7 @@ import com.example.auth0UsersAndRoles.entities.dto.AssingRoleDTO;
 import com.example.auth0UsersAndRoles.entities.dto.UserDTO;
 import com.example.auth0UsersAndRoles.repositories.RoleRepository;
 import com.example.auth0UsersAndRoles.services.UserBBDDService;
-import com.example.auth0UsersAndRoles.services.UserService;
+import com.example.auth0UsersAndRoles.services.UserAuth0Service;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,12 +20,12 @@ import java.util.stream.Collectors;
 @RequestMapping(path = "/api/admin/users", produces = MediaType.APPLICATION_JSON_VALUE)
 public class UserController {
 
-    private final UserService userService;
+    private final UserAuth0Service userAuth0Service;
     private final UserBBDDService userBBDDService;
     private final RoleRepository roleRepository;
 
-    public UserController(UserService userService, RoleRepository roleRepository, UserBBDDService userBBDDService) {
-        this.userService = userService;
+    public UserController(UserAuth0Service userAuth0Service, RoleRepository roleRepository, UserBBDDService userBBDDService) {
+        this.userAuth0Service = userAuth0Service;
         this.roleRepository = roleRepository;
         this.userBBDDService = userBBDDService;
     }
@@ -44,6 +44,9 @@ public class UserController {
     public ResponseEntity<?> getUserById(@RequestBody UserDTO userDTO) {
         try {
             User user = userBBDDService.findById(userDTO.getAuth0Id());
+            if(user == null) {
+                return ResponseEntity.ok(false);
+            }
             return ResponseEntity.ok(user);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado: " + e.getMessage());
@@ -53,8 +56,8 @@ public class UserController {
     @PostMapping("/createUser")
     public ResponseEntity<?> createUser(@RequestBody UserDTO userDTO) {
         try {
-            com.auth0.json.mgmt.users.User newUser = userService.createUser(userDTO);
-            userService.assignRoles(newUser.getId(), userDTO.getRoles());
+            com.auth0.json.mgmt.users.User newUser = userAuth0Service.createUser(userDTO);
+            userAuth0Service.assignRoles(newUser.getId(), userDTO.getRoles());
 
             Set<Roles> rolesAsignados = userDTO.getRoles().stream()
                     .map(idRol -> roleRepository.findByAuth0RoleId(idRol)
@@ -78,8 +81,12 @@ public class UserController {
     @PostMapping("/createUserClient")
     public ResponseEntity<?> createUserClient(@RequestBody UserDTO userDTO) {
         try {
-            com.auth0.json.mgmt.users.User userAuth0 = userService.getUserById(userDTO.getAuth0Id());
-            userService.assignRoles(userAuth0.getId(), userDTO.getRoles());
+            com.auth0.json.mgmt.users.User userAuth0 = userAuth0Service.getUserById(userDTO.getAuth0Id());
+            if(userAuth0 == null) {
+                return ResponseEntity.internalServerError().body("El usuario no existe");
+            }
+
+            userAuth0Service.assignRoles(userAuth0.getId(), userDTO.getRoles());
 
             Set<Roles> rolesAsignados = userDTO.getRoles().stream()
                     .map(idRol -> roleRepository.findByAuth0RoleId(idRol)
@@ -103,7 +110,7 @@ public class UserController {
     @PutMapping("/modifyUser")
     public ResponseEntity<?> modifyUser(@RequestBody UserDTO userDTO) {
         try {
-            com.auth0.json.mgmt.users.User newUser = userService.modifyUser(userDTO);
+            com.auth0.json.mgmt.users.User newUser = userAuth0Service.modifyUser(userDTO);
 
             Set<Roles> rolesAsignados = userDTO.getRoles().stream()
                     .map(idRol -> roleRepository.findByAuth0RoleId(idRol)
@@ -140,7 +147,7 @@ public class UserController {
     public ResponseEntity<?> deleteUserFisic(@RequestBody UserDTO userDTO) {
         try {
             userBBDDService.deleteFisic(userDTO.getAuth0Id());
-            userService.deleteUser(userDTO.getAuth0Id());
+            userAuth0Service.deleteUser(userDTO.getAuth0Id());
             return ResponseEntity.ok("Usuario eliminado físicamente.");
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Error al eliminar físicamente al usuario: " + e.getMessage());
@@ -150,7 +157,7 @@ public class UserController {
     @PostMapping("/addRolesUser")
     public ResponseEntity<?> assignRoles(@RequestBody AssingRoleDTO request) {
         try {
-            userService.assignRoles(request.getId(), request.getRoles());
+            userAuth0Service.assignRoles(request.getId(), request.getRoles());
             User user = userBBDDService.findById(request.getId());
 
             Set<Roles> rolesAAgregar = request.getRoles().stream()
@@ -168,7 +175,7 @@ public class UserController {
     @PostMapping("/removeRolesUser")
     public ResponseEntity<?> removeRoles(@RequestBody AssingRoleDTO request) {
         try {
-            userService.removeRoles(request.getId(), request.getRoles());
+            userAuth0Service.removeRoles(request.getId(), request.getRoles());
             User user = userBBDDService.findById(request.getId());
 
             Set<Roles> rolesAEliminar = request.getRoles().stream()

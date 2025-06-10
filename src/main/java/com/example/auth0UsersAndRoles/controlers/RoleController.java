@@ -4,7 +4,7 @@ import com.auth0.json.mgmt.Role;
 import com.example.auth0UsersAndRoles.entities.Roles;
 import com.example.auth0UsersAndRoles.entities.dto.RoleDTO;
 import com.example.auth0UsersAndRoles.services.RoleAuth0Service;
-import com.example.auth0UsersAndRoles.services.RoleService;
+import com.example.auth0UsersAndRoles.services.RoleBBDDService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,26 +16,26 @@ public class RoleController {
 
     private RoleAuth0Service roleService;
 
-    private RoleService roleServicebbdd;
+    private RoleBBDDService roleBBDDServicebbdd;
 
-    public RoleController(RoleService roleServicebbdd, RoleAuth0Service roleService) {
-        this.roleServicebbdd = roleServicebbdd;
+    public RoleController(RoleBBDDService roleBBDDServicebbdd, RoleAuth0Service roleService) {
+        this.roleBBDDServicebbdd = roleBBDDServicebbdd;
         this.roleService = roleService;
     }
 
     @GetMapping("/getRoleByName")
     public Roles getRoleByName(@RequestParam String name) throws Exception {
-        return roleServicebbdd.findByName(name);
+        return roleBBDDServicebbdd.findByName(name);
     }
 
     @GetMapping
     public List<Roles> getAllRoles() throws Exception {
-        return roleServicebbdd.findAll();
+        return roleBBDDServicebbdd.findAll();
     }
 
     @GetMapping("/getRoleById")
     public Roles getRoleById(@RequestParam("id") String id) throws Exception {
-        return roleServicebbdd.findById(id);
+        return roleBBDDServicebbdd.findById(id);
     }
 
     @PutMapping("/modifyRole")
@@ -56,7 +56,7 @@ public class RoleController {
                     .build();
             updatedRole.setId(roleDTO.getId());
 
-            return roleServicebbdd.update(updatedRole);
+            return roleBBDDServicebbdd.update(updatedRole);
         } catch (Exception e) {
             // Revertir Auth0 si falla BBDD
             if (previousRole != null) {
@@ -90,7 +90,7 @@ public class RoleController {
                     .name(roleDTO.getName())
                     .build();
 
-            return roleServicebbdd.save(roles);
+            return roleBBDDServicebbdd.save(roles);
         } catch (Exception e) {
             // Revertir Auth0 si falla BBDD
             if (rolAuth != null && rolAuth.getId() != null) {
@@ -106,7 +106,7 @@ public class RoleController {
 
     @DeleteMapping("/deleteRole")
     public void deleteRole(@RequestParam("id") String id) throws Exception {
-        roleServicebbdd.delete(id);
+        roleBBDDServicebbdd.delete(id);
     }
 
     @DeleteMapping("/deleteRoleFisic")
@@ -114,10 +114,10 @@ public class RoleController {
         Roles roleToDelete = null;
         try {
             // Obtener datos del rol antes de eliminar
-            roleToDelete = roleServicebbdd.findById(id);
+            roleToDelete = roleBBDDServicebbdd.findById(id);
 
             // Eliminar en BBDD
-            roleServicebbdd.deleteFisic(id);
+            roleBBDDServicebbdd.deleteFisic(id);
 
             // Eliminar en Auth0
             roleService.deleteRole(roleToDelete.getAuth0RoleId());
@@ -125,7 +125,7 @@ public class RoleController {
             // Si falla en Auth0, intentar restaurar en BBDD
             if (roleToDelete != null) {
                 try {
-                    roleServicebbdd.save(roleToDelete);
+                    roleBBDDServicebbdd.save(roleToDelete);
                 } catch (Exception ex) {
                     System.err.println("Error al restaurar rol en BBDD: " + ex.getMessage());
                 }

@@ -46,14 +46,17 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
                                 .requestMatchers("/api/public").permitAll()
-                                .requestMatchers("/api/client/**").hasAuthority("Cliente")
-                                .requestMatchers("/api/admin/users/getUserById").hasAuthority("Cliente")
-                                .requestMatchers("/api/admin/users/createUserClient").hasAuthority("Cliente")
-                                .requestMatchers("/api/admin/roles/getRoleByName").hasAuthority("Cliente")
-                                .requestMatchers("/api/kitchener/**").hasAuthority("Cocinero")
-                                .requestMatchers("/api/admin/**", "/api/client/**", "/api/kitchener/**").hasAuthority("Administrador")
+                                .requestMatchers("/api/admin/users/getUserById").authenticated()
+                                .requestMatchers("/api/admin/users/createUserClient").authenticated()
+                                .requestMatchers("/api/admin/roles/getRoleByName").authenticated()
+                                .requestMatchers("/api/client/**").hasAnyAuthority("Cliente","Administrador")
+                                .requestMatchers("/api/kitchener/**").hasAnyAuthority("Cocinero","Administrador")
+                                .requestMatchers("/api/admin/**").hasAuthority("Administrador")
+
                                 .anyRequest().authenticated()
-                        //.anyRequest().permitAll()
+
+
+                                //.anyRequest().permitAll()
                 )
                 .oauth2ResourceServer(oauth2ResourceServer ->
                         oauth2ResourceServer
@@ -96,7 +99,7 @@ public class SecurityConfiguration {
     @Bean
     JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter converter = new JwtGrantedAuthoritiesConverter();
-        converter.setAuthoritiesClaimName("https://pruebaApi/roles");
+        converter.setAuthoritiesClaimName(audience+"/roles");
         converter.setAuthorityPrefix("");
 
         JwtAuthenticationConverter jwtConverter = new JwtAuthenticationConverter();

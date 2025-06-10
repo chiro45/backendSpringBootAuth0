@@ -1,4 +1,5 @@
 package com.example.auth0UsersAndRoles.entities.dto;
+
 import lombok.Data;
 
 @Data

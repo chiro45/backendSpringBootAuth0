@@ -26,6 +26,7 @@ public class RoleAuth0Service {
     public RolesPage getAllRoles() throws Exception {
         return managementAPI.roles().list(null).execute();
     }
+
     //traer un rol por id
     public Role getRoleById(String roleId) throws Exception {
         return managementAPI.roles().get(roleId).execute();
